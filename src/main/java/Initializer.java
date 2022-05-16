@@ -1,9 +1,12 @@
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class Initializer {
@@ -13,8 +16,10 @@ public class Initializer {
     private String jdbcUrl;
     private String username;
     private String password;
+    private HikariDataSource dataSource;
+    private Connection connection;
 
-    void init(){
+    Initializer(){
         Properties prop = new Properties();
         String propFileName = "mybatis.cfg";
         InputStream configStream = null;
@@ -30,5 +35,23 @@ public class Initializer {
         jdbcUrl = prop.getProperty("database.url");
         username = prop.getProperty("database.username");
         password = prop.getProperty("database.password");
+        dataSource = new HikariDataSource();
+        dataSource.setDriverClassName(jdbcDriver);
+        dataSource.setJdbcUrl(jdbcUrl);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+        try {
+            connection = dataSource.getConnection();
+        } catch (SQLException e) {
+            logger.error("SQLException",e);
+        }
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 }
